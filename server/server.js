@@ -20,9 +20,11 @@ io.on('connection', (socket)=>{
 
     socket.broadcast.emit("newMessage", generateMsg("Admin", "New User has joined the chat group"));
 
-    socket.on('createMessage', (data)=>{
+    socket.on('createMessage', (data, /*callback*/)=>{
         //broadcasing incoming message to everyone that is connected
         io.emit('newMessage', generateMsg(data.from, data.text));
+        console.log("Recieved Msg", data);
+        //callback(generateMsg("server", "your msg has been recieved"));
     })
 
     socket.on('disconnect', ()=>{
