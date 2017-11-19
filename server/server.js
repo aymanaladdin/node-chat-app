@@ -14,6 +14,10 @@ const io = socketIO(server);
 io.on('connection', (socket)=>{
     console.log(`new user connected`);
 
+    socket.emit("newMessage", {from: "Admin", text: "Welcome to the chat group :)", createdAt: new Date().getTime()}); 
+
+    socket.broadcast.emit("newMessage", {from: "Admin", text: "New User has joined the chat group", createdAt: new Date().getTime()});
+
     socket.on('createMessage', (data)=>{
         //broadcasing incoming message to everyone that is connected
         io.emit('newMessage', {from: data.from, text: data.text, createdAt: new Date().getTime()});
