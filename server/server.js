@@ -4,7 +4,7 @@ const http = require("http");
 const express = require("express");
 const socketIO = require("socket.io");
 
-const {generateMsg} = require("./utils/message");
+const {generateMsg, generateLocationMsg} = require("./utils/message");
 
 const root = path.join(__dirname, "../public");
 const port = process.env.PORT || 3000
@@ -25,11 +25,15 @@ io.on('connection', (socket)=>{
         io.emit('newMessage', generateMsg(data.from, data.text));
         console.log("Recieved Msg", data);
         //callback(generateMsg("server", "your msg has been recieved"));
-    })
+    });
+
+    socket.on("createLocationMsg", (position)=>{
+        io.emit('newLocationMeg', generateLocationMsg("User", position.lat, position.long));
+    });
 
     socket.on('disconnect', ()=>{
         console.log('user disconnected');
-    })
+    });
 });
 
 // app.use((req, res, next)=>{
