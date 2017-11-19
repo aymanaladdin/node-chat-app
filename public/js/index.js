@@ -40,8 +40,14 @@ $( function(){
     
 
     $("#message-form").on('submit', function(event){
+        var messageTextbox = $("[name=msg]");
+        
         event.preventDefault();
-        socket.emit("createMessage", { from: "User", text: $("[name=msg]").val() });
+        
+        socket.emit("createMessage", { from: "User", text: messageTextbox.val() }, function(){
+            //reset textbox when event callback acknowkledge reach from the server
+            messageTextbox.val("");
+        });
     });
 
 
@@ -53,9 +59,13 @@ $( function(){
             alet("Navigator Geolocation is not supported on your Browser :( ");
         }
         else{
+            locationBtn.attr("disabled", "disabled");
+
             navigator.geolocation.getCurrentPosition(function(position){
+                locationBtn.removeAttr('disabled');
                 socket.emit("createLocationMsg", { lat: position.coords.latitude, long: position.coords.longitude });
             }, function(){
+                locationBtn.removeAttr('disabled');
                 alert("Unable to get loaction!!");
             });
         }
