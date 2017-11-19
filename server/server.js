@@ -4,6 +4,8 @@ const http = require("http");
 const express = require("express");
 const socketIO = require("socket.io");
 
+const {generateMsg} = require("./utils/message");
+
 const root = path.join(__dirname, "../public");
 const port = process.env.PORT || 3000
 
@@ -14,20 +16,19 @@ const io = socketIO(server);
 io.on('connection', (socket)=>{
     console.log(`new user connected`);
 
-    socket.emit("newMessage", {from: "Admin", text: "Welcome to the chat group :)", createdAt: new Date().getTime()}); 
+    socket.emit("newMessage", generateMsg("Admin", "Welcome to the chat group :)")); 
 
-    socket.broadcast.emit("newMessage", {from: "Admin", text: "New User has joined the chat group", createdAt: new Date().getTime()});
+    socket.broadcast.emit("newMessage", generateMsg("Admin", "New User has joined the chat group"));
 
     socket.on('createMessage', (data)=>{
         //broadcasing incoming message to everyone that is connected
-        io.emit('newMessage', {from: data.from, text: data.text, createdAt: new Date().getTime()});
+        io.emit('newMessage', generateMsg(data.from, data.text));
     })
 
     socket.on('disconnect', ()=>{
         console.log('user disconnected');
     })
 });
-
 
 // app.use((req, res, next)=>{
 //     console.log(req.method, req.url);
