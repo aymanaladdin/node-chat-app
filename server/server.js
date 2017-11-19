@@ -14,11 +14,9 @@ const io = socketIO(server);
 io.on('connection', (socket)=>{
     console.log(`new user connected`);
 
-    //emit event for new messages
-    socket.emit('newMessage', {from: "ahmed@exg.co", text: "انت فين يا بأف", createdAt: "12452"});
-
     socket.on('createMessage', (data)=>{
-        console.log('New Message Created:', data)
+        //broadcasing incoming message to everyone that is connected
+        io.emit('newMessage', {from: data.from, text: data.text, createdAt: new Date().getTime()});
     })
 
     socket.on('disconnect', ()=>{
