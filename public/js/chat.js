@@ -24,6 +24,16 @@ $( function(){
     var socket = io();
     socket.on('connect', function(){
         console.log("connect to the server");
+
+        socket.emit('join', $.deparam(), function(err){
+            if(err){
+                alert(err);
+                window.location.href = "/";
+            }
+            else{
+
+            }
+        });
     });
     
     socket.on('newMessage', function(data){ 
@@ -37,6 +47,16 @@ $( function(){
         //append our list with it
         jQuery("#message-list").append(li);
         scrollToBottom();   
+    });
+
+    socket.on('updatePeopleList', function(people){
+        console.log(people);
+        var ol = jQuery("<ol></ol>");
+        people.forEach(function(name){
+            ol.append(jQuery("<li></li>").text(name));
+        });
+
+        jQuery("#people-list").html(ol);
     });
 
     socket.on('newLocationMeg', function(data){

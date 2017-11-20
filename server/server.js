@@ -5,6 +5,8 @@ const express = require("express");
 const socketIO = require("socket.io");
 
 const {generateMsg, generateLocationMsg} = require("./utils/message");
+const {isValidString} = require("./utils/valodators");
+const {Users} = require("./utils/users");
 
 const root = path.join(__dirname, "../public");
 const port = process.env.PORT || 3000
@@ -12,13 +14,26 @@ const port = process.env.PORT || 3000
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
+const users = new Users();
 
 io.on('connection', (socket)=>{
     console.log(`new user connected`);
 
-    socket.emit("newMessage", generateMsg("Admin", "Welcome to the chat group :)")); 
+    socket.on('join', (params, callback)=>{
+        if(!isValidString(params.name) || !isValidString(params.chat)){
+            callback("User name and Chat room required");
+        }
+        //make the user join the room
+        socket.join(params.chat);
+        users.removeUser(socket.id);
+        users.addUser(socket.id, params.name, params.chat);
 
-    socket.broadcast.emit("newMessage", generateMsg("Admin", "New User has joined the chat group"));
+        io.to(params.chat).emit("updatePeopleList", users.getUserList(params.chat));
+        socket.emit("newMessage", generateMsg("Admin", "Welcome to the chat group :)")); 
+        socket.broadcast.to(params.chat).emit("newMessage", generateMsg("Admin", `${params.name} has joined the chat group`));
+
+        callback();
+    })
 
     socket.on('createMessage', (data, callback)=>{
         //broadcasing incoming message to everyone that is connected
@@ -32,16 +47,16 @@ io.on('connection', (socket)=>{
     });
 
     socket.on('disconnect', ()=>{
-        console.log('user disconnected');
+        const user = users.removeUser(socket.id);
+        if(user){
+            io.to(user.room).emit("updatePeopleList", users.getUserList(user.room));
+            io.to(user.room).emit("newMessage", generateMsg("Admin", `${user.name} has left the chat group`));
+            console.log('user disconnected');            
+        }
     });
 });
 
-// app.use((req, res, next)=>{
-//     console.log(req.method, req.url);
-//     next();
-// });
-
 app.use(express.static(root));
 
-server.listen(port, ()=> console.log(`app is running on port ${port}`));
+server.listen(port, ()=> console.log(`app is running on port ${port}`, users.userList));
 
