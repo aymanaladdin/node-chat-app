@@ -13,7 +13,7 @@ $( function(){
     socket.on('newMessage', function(data){
         console.log('New Message: ', data);
         var li = jQuery("<li></li>");
-        li.text(`${data.from}: ${data.text}`);
+        li.text(`${data.from}, ${moment(data.createdAt).format("h:mm a")}: ${data.text}`);
         $("#message-list").append(li);
     
     });
@@ -24,7 +24,7 @@ $( function(){
         var li = jQuery("<li></li>");
         var a = jQuery("<a target='_blank'>My Current Location</a>");
         
-        li.text(`${data.from}: `);
+        li.text(`${data.from}, ${moment(data.createdAt).format("h:mm a")}: `);
         a.attr('href', data.url);
 
         li.append(a);
