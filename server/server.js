@@ -36,14 +36,21 @@ io.on('connection', (socket)=>{
     })
 
     socket.on('createMessage', (data, callback)=>{
-        //broadcasing incoming message to everyone that is connected
-        io.emit('newMessage', generateMsg(data.from, data.text));
-        console.log("Recieved Msg", data);
+        const user = users.getUser(socket.id);
+        if(user && isValidString(data.text)){
+            //broadcasing incoming message to everyone that is in particular chat room
+            io.to(user.room).emit('newMessage', generateMsg(user.name, data.text));
+        }
+        //console.log("Recieved Msg", data);
         callback();
     });
 
     socket.on("createLocationMsg", (position)=>{
-        io.emit('newLocationMeg', generateLocationMsg("User", position.lat, position.long));
+        const user = users.getUser(socket.id);
+        if(user){
+            //broadcasing incoming message to everyone that is in particular chat room
+            io.to(user.room).emit('newLocationMeg', generateLocationMsg(user.name, position.lat, position.long));
+        }
     });
 
     socket.on('disconnect', ()=>{

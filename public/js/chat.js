@@ -21,8 +21,10 @@ $( function(){
         }
       }
 
-    var socket = io();
-    socket.on('connect', function(){
+   
+      var socket = io();
+   
+      socket.on('connect', function(){
         console.log("connect to the server");
 
         socket.emit('join', $.deparam(), function(err){
@@ -78,12 +80,13 @@ $( function(){
     });
     
 
+    //emit new text message
     $("#message-form").on('submit', function(event){
         var messageTextbox = $("[name=msg]");
         
         event.preventDefault();
         
-        socket.emit("createMessage", { from: "User", text: messageTextbox.val() }, function(){
+        socket.emit("createMessage", { text: messageTextbox.val() }, function(){
             //reset textbox when event callback acknowkledge reach from the server
             messageTextbox.val("");
         });
