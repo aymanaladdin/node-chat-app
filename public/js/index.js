@@ -10,26 +10,27 @@ $( function(){
         console.log("connect to the server");
     });
     
-    socket.on('newMessage', function(data){
+    socket.on('newMessage', function(data){ 
         console.log('New Message: ', data);
-        var li = jQuery("<li></li>");
-        li.text(`${data.from}, ${moment(data.createdAt).format("h:mm a")}: ${data.text}`);
-        $("#message-list").append(li);
-    
+        
+        var formattedTime = moment(data.createdAt).format("h:mm a");
+        //get the inner html inside template script
+        var template = jQuery("#msg-template").html();
+        //generat rendered list item --msg
+        var li = Mustache.render(template, {from: data.from, text: data.text , createdAt: formattedTime});
+        //append our list with it
+        jQuery("#message-list").append(li);   
     });
 
     socket.on('newLocationMeg', function(data){
         console.log('New Message: ', data);
         
-        var li = jQuery("<li></li>");
-        var a = jQuery("<a target='_blank'>My Current Location</a>");
-        
-        li.text(`${data.from}, ${moment(data.createdAt).format("h:mm a")}: `);
-        a.attr('href', data.url);
+        var formattedTime = moment(data.createdAt).format("h:mm a");
 
-        li.append(a);
-        $("#message-list").append(li);
+        var template = jQuery("#locationMsg-template").html();
+        var li = Mustache.render(template, {from: data.from, url: data.url, createdAt: formattedTime});
         
+        $("#message-list").append(li);   
     });
 
     
